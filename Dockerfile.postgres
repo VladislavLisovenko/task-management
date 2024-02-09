@@ -1,0 +1,6 @@
+FROM postgres:latest
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_PASSWORD=sec
+ENV POSTGRES_DB=postgres
+COPY . .
+RUN chown -R postgres:postgres /docker-entrypoint-initdb.d/

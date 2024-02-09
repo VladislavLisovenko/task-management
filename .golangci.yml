@@ -1,0 +1,92 @@
+﻿run:
+  tests: true
+
+linters-settings:
+  funlen:
+    lines: 150
+    statements: 80
+  depguard:
+    rules:
+      main:
+        allow: [
+          "testing",
+          "context",
+          "bytes",
+          "time",
+          "errors",
+          "strconv",
+          "log",
+          "fmt",
+          "flag",
+          "net/http",
+          "database/sql",
+          "strings",
+          "encoding/json",
+          "github.com/OpenPeeDeeP/depguard",
+          "github.com/jackc/pgx/stdlib",
+          "github.com/go-chi/chi",
+          "github.com/VladislavLisovenko/task_management/server/entities",
+          "github.com/VladislavLisovenko/task_management/server/handlers",
+          "github.com/VladislavLisovenko/task_management/server/db",
+          "github.com/VladislavLisovenko/task_management/client/http_requests",
+          "github.com/VladislavLisovenko/task_management/client/menu",
+          "github.com/VladislavLisovenko/task_management/client/entities",
+        ]
+
+linters:
+  disable-all: true
+  enable:
+    - asciicheck
+    - bodyclose
+    # - deadcode
+    - depguard
+    - dogsled
+    - dupl
+    - durationcheck
+    - errorlint
+    - exhaustive
+    - exportloopref
+    - funlen
+    - gci
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - gofmt
+    - gofumpt
+    - goheader
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    # - ifshort
+    - importas
+    - ineffassign
+    - lll
+    - makezero
+    - misspell
+    - nestif
+    - nilerr
+    - noctx
+    - nolintlint
+    - prealloc
+    - predeclared
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - staticcheck
+    # - structcheck
+    - stylecheck
+    - tagliatelle
+    - thelper
+    - tparallel
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    # - varcheck
+    - wastedassign
+    - whitespace
