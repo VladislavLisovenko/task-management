@@ -19,6 +19,8 @@ const (
 	no         = "нет"
 )
 
+var ErrUserNotFound = errors.New("пользователь с таким именем не найден")
+
 func formatBool(b bool) string {
 	if b {
 		return yes
@@ -46,13 +48,19 @@ func scanDate(hint string) (time.Time, error) {
 	return StringAsDate(str)
 }
 
-func ShowMenu() {
+func ShowMainMenu() {
 	fmt.Println("Введите номер команды 1-5 или q для выхода:")
 	fmt.Println("1. Добавить задачу")
 	fmt.Println("2. Удалить задачу")
 	fmt.Println("3. Изменить задачу")
 	fmt.Println("4. Показать список всех задач")
 	fmt.Println("5. Показать список задач с отбором")
+}
+
+func ShowLoginMenu() {
+	fmt.Println("Введите номер команды 1-2 или q для выхода:")
+	fmt.Println("1. Создать пользователя")
+	fmt.Println("2. Войти под существующим пользователем")
 }
 
 func LogIn(url string) (entities.User, error) {
@@ -63,9 +71,41 @@ func LogIn(url string) (entities.User, error) {
 		return entities.User{}, errors.New("завершение работы пользователем")
 	}
 
+	addr := fmt.Sprintf("%s/users/%s", url, userName)
+	response, err := httprequests.SendGetRequest(addr)
+	if err != nil {
+		fmt.Println(err.Error())
+		return entities.User{}, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode == http.StatusNotFound {
+		return entities.User{}, ErrUserNotFound
+	}
+
+	userID, err := strconv.Atoi(response.Header.Get("id"))
+	if err != nil {
+		fmt.Println(err.Error())
+		return entities.User{}, err
+	}
+
+	return entities.User{Name: userName, ID: userID}, nil
+}
+
+func SignIn(url string) (entities.User, error) {
+	fmt.Println("Введите имя пользователя используя цифры и символы русского или латинского алфавита или 'q' для выхода:")
+	var userName string
+	fmt.Scanln(&userName)
+	if strings.ToLower(userName) == "q" {
+		return entities.User{}, errors.New("завершение работы пользователем")
+	}
+
 	addr := fmt.Sprintf("%s/users", url)
 	user := entities.User{Name: userName}
-	httprequests.ProcessEntity[*entities.User](addr, http.MethodGet, &user)
+	err := httprequests.ProcessEntity[*entities.User](addr, http.MethodPut, &user)
+	if err != nil {
+		return entities.User{}, err
+	}
 	if user.GetID() == 0 {
 		return entities.User{}, errors.New("не удалось получить информацию о пользователе, убедитесь что сервер доступен")
 	}
@@ -102,14 +142,21 @@ func AddTask(url string, user entities.User) {
 		return
 	}
 
-	task := &entities.Task{Description: description, ExpirationDate: expirationDate, User: user}
+	task := &entities.Task{Description: description, ExpirationDate: expirationDate, User: user, CreationDate: time.Now()}
 	addr := fmt.Sprintf("%s/tasks", url)
-	httprequests.ProcessEntity[*entities.Task](addr, http.MethodPost, task)
+	err = httprequests.ProcessEntity[*entities.Task](addr, http.MethodPut, task)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 }
 
 func RemoveTask(url string, user entities.User) {
 	addr := fmt.Sprintf("%s/tasks", url)
-	tasks := httprequests.ProcessTaskList(addr, entities.TaskListFilter{User: user})
+	tasks, err := httprequests.ProcessTaskList(addr, entities.TaskListFilter{User: user})
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 	ShowTaskList(tasks)
 
 	fmt.Println("Введите ID задачи:")
@@ -132,7 +179,11 @@ func RemoveTask(url string, user entities.User) {
 
 func EditTask(url string, user entities.User) {
 	addr := fmt.Sprintf("%s/tasks", url)
-	tasks := httprequests.ProcessTaskList(addr, entities.TaskListFilter{User: user})
+	tasks, err := httprequests.ProcessTaskList(addr, entities.TaskListFilter{User: user})
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 
 	fmt.Println("")
 	fmt.Println("Введите ID задачи:")
@@ -193,13 +244,20 @@ func EditTask(url string, user entities.User) {
 
 	if taskChanged {
 		addr = fmt.Sprintf("%s/tasks/%d", url, task.GetID())
-		httprequests.ProcessEntity[*entities.Task](addr, http.MethodPost, &task)
+		err := httprequests.ProcessEntity[*entities.Task](addr, http.MethodPost, &task)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 	}
 }
 
 func ListTask(url string, user entities.User) {
 	addr := fmt.Sprintf("%s/tasks", url)
-	tasks := httprequests.ProcessTaskList(addr, entities.TaskListFilter{User: user})
+	tasks, err := httprequests.ProcessTaskList(addr, entities.TaskListFilter{User: user})
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 	ShowTaskList(tasks)
 }
 
@@ -244,6 +302,10 @@ func ListTaskWithFilter(url string, user entities.User) {
 	}
 
 	addr := fmt.Sprintf("%s/tasks", url)
-	tasks := httprequests.ProcessTaskList(addr, *taskListFilter)
+	tasks, err := httprequests.ProcessTaskList(addr, *taskListFilter)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 	ShowTaskList(tasks)
 }

@@ -1,7 +1,7 @@
 package db
 
 import (
-	"database/sql"
+	"errors"
 
 	"github.com/VladislavLisovenko/task_management/server/entities"
 )
@@ -17,9 +17,7 @@ func UserByName(userName string) (entities.User, error) {
 	row := database.QueryRow(queryString, userName)
 	var userID int
 	err := row.Scan(&userID)
-	if err == sql.ErrNoRows {
-		return AddUser(userName)
-	} else if err != nil {
+	if err != nil {
 		return entities.User{}, err
 	}
 
@@ -27,6 +25,11 @@ func UserByName(userName string) (entities.User, error) {
 }
 
 func AddUser(userName string) (entities.User, error) {
+	user, _ := UserByName(userName)
+	if user.GetID() != 0 {
+		return entities.User{}, errors.New("такой пользователь уже существует")
+	}
+
 	lastInsertedID := 0
 	queryString := `
 	INSERT INTO PUBLIC.USERS 

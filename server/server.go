@@ -15,11 +15,12 @@ func main() {
 	port := "8080"
 
 	router := chi.NewRouter()
-	router.Get("/users", handlers.UserByName)
-	router.Post("/tasks", handlers.AddTask)
+	router.Get("/users/{name:[a-zA-Zа-яА-Я0-9]+}", handlers.UserByName)
+	router.Put("/users", handlers.AddUser)
+	router.Put("/tasks", handlers.AddTask)
 	router.Delete("/tasks/{id:[0-9]+}", handlers.DeleteTask)
 	router.Post("/tasks/{id:[0-9]+}", handlers.UpdateTask)
-	router.Get("/tasks", handlers.TaskList)
+	router.Post("/tasks", handlers.TaskList)
 
 	srv := &http.Server{
 		ReadTimeout:  5 * time.Second,
