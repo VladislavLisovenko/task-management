@@ -1,0 +1,33 @@
+FROM golang:1.20-alpine as build
+
+
+ENV BIN_FILE=/usr/app/serverapp
+ENV CODE_DIR=/go/src/
+
+WORKDIR ${CODE_DIR}
+
+# Кэшируем слои с модулями
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+
+COPY . ${CODE_DIR}
+
+# RUN apk add build-base
+# RUN CGO_ENABLED=1 \
+#   go test ./server -race -count 4
+
+# Собираем статический бинарник Go (без зависимостей на Си API),
+# иначе он не будет работать в alpine образе.
+ARG LDFLAGS
+RUN CGO_ENABLED=0 go build \
+   -ldflags "$LDFLAGS" \
+   -o ${BIN_FILE} ${CODE_DIR}/server/server.go
+
+# На выходе тонкий образ
+FROM alpine:3.9
+
+ENV BIN_FILE=/usr/app/serverapp
+COPY --from=build ${BIN_FILE} ${BIN_FILE}
+
+ENTRYPOINT ["./usr/app/serverapp"]
