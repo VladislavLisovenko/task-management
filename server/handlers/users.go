@@ -14,16 +14,21 @@ func UserByName(w http.ResponseWriter, r *http.Request) {
 
 	if userName == "" {
 		w.Header().Add("error", "Имя пользователя не указано")
+
 		w.WriteHeader(http.StatusNotFound)
+
 		return
 	}
 
 	user, err := db.UserByName(userName)
 	if err != nil {
 		w.Header().Add("error", err.Error())
+
 		w.WriteHeader(http.StatusNotFound)
+
 		return
 	}
+
 	w.Header().Add("id", strconv.Itoa(user.GetID()))
 }
 
@@ -33,8 +38,11 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 	user, err := db.AddUser(userDecoded.Name)
 	if err != nil {
 		w.Header().Add("error", fmt.Sprint(err))
+
 		w.WriteHeader(http.StatusBadRequest)
+
 		return
 	}
+
 	w.Header().Add("id", strconv.Itoa(user.GetID()))
 }
