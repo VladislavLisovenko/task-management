@@ -14,7 +14,7 @@ func ExecuteQuery(command string) (*sql.Rows, error) {
 }
 
 func init() {
-	db, err := sql.Open("pgx", "postgres://postgres:sec@localhost:5436/postgres")
+	db, err := sql.Open("pgx", "postgres://postgres:sec@localhost:5432/postgres")
 	if err != nil {
 		log.Fatalf("Failed to load driver: %v", err)
 	}
