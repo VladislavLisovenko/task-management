@@ -62,7 +62,7 @@ jobs:
         fi
 
     - name: Run migrations
-      run: psql -f docker-entrypoint-initdb.d/filldb.sql postgresql://postgres:postgres@localhost:5432/postgres
+      run: psql -f docker-entrypoint-initdb.d/filldb.sql postgresql://postgres:postgres@localhost:5436/postgres
 
     - name: Build
       run: go build -v -o serverapp ./server/server.go
