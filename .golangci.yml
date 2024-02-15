@@ -32,6 +32,8 @@ linters-settings:
           "github.com/VladislavLisovenko/task_management/client/menu",
           "github.com/VladislavLisovenko/task_management/client/entities",
           "github.com/stretchr/testify/require",
+          "crypto/rand",
+          "math/big",
         ]
 
 linters:
