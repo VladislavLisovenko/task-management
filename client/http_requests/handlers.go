@@ -19,6 +19,7 @@ func SendGetRequest(url string) (*http.Response, error) {
 	}
 
 	httpClient := http.Client{}
+
 	response, err := httpClient.Do(getRequest)
 	if err != nil {
 		return nil, err
@@ -34,6 +35,7 @@ func SendRequest(url string, method string, message []byte) (*http.Response, err
 	}
 
 	httpClient := http.Client{}
+
 	response, err := httpClient.Do(getRequest)
 	if err != nil {
 		return nil, err
@@ -52,17 +54,22 @@ func ProcessEntity[T entities.HasID](url string, httpMethod string, entity T) er
 	if err != nil {
 		return err
 	}
+
 	defer response.Body.Close()
+
 	if response.StatusCode != http.StatusOK {
 		return errors.New(response.Header.Get("error"))
 	}
 
 	headerID := response.Header.Get("id")
+
 	if headerID != "" {
 		id, err1 := strconv.Atoi(headerID)
+
 		if err1 != nil {
 			return err1
 		}
+
 		entity.SetID(id)
 	}
 
@@ -74,16 +81,20 @@ func ProcessTaskList(url string, tlf entities.TaskListFilter) ([]entities.Task, 
 	if err != nil {
 		return []entities.Task{}, err
 	}
+
 	response, err := SendRequest(url, http.MethodPost, msgEncoded)
 	if err != nil {
 		return []entities.Task{}, err
 	}
+
 	defer response.Body.Close()
+
 	if response.StatusCode != http.StatusOK {
 		return []entities.Task{}, errors.New(response.Header.Get("error"))
 	}
 
 	var tasks []entities.Task
+
 	err = json.NewDecoder(response.Body).Decode(&tasks)
 	if err != nil {
 		return []entities.Task{}, err
@@ -97,9 +108,12 @@ func ProcessEntityRemoving(url string) error {
 	if err != nil {
 		return err
 	}
+
 	defer response.Body.Close()
+
 	if response.StatusCode != http.StatusOK {
 		fmt.Println(response.Header.Get("error"))
+
 		return errors.New(response.Header.Get("error"))
 	}
 

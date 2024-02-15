@@ -16,7 +16,6 @@ import (
 
 	"github.com/VladislavLisovenko/task_management/client/entities"
 	"github.com/VladislavLisovenko/task_management/server/handlers"
-
 	"github.com/stretchr/testify/require"
 )
 
@@ -33,7 +32,9 @@ func getUserByName(name string) (entities.User, error) {
 	}
 
 	rr := httptest.NewRecorder()
+
 	handler := http.HandlerFunc(handlers.UserByName)
+
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
@@ -50,6 +51,7 @@ func getUserByName(name string) (entities.User, error) {
 	}
 
 	user := entities.User{Name: name}
+
 	user.SetID(id)
 
 	return user, nil
@@ -69,7 +71,9 @@ func createUser(name string) (entities.User, error) {
 	}
 
 	rr := httptest.NewRecorder()
+
 	handler := http.HandlerFunc(handlers.AddUser)
+
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
@@ -96,15 +100,19 @@ func tackList(tlf entities.TaskListFilter) []entities.Task {
 	}
 
 	rr := httptest.NewRecorder()
+
 	handler := http.HandlerFunc(handlers.TaskList)
+
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
 		log.Fatalf("handler returned wrong status code: got %v want %v",
+
 			status, http.StatusOK)
 	}
 
 	var tasks []entities.Task
+
 	err = json.NewDecoder(rr.Body).Decode(&tasks)
 	if err != nil {
 		log.Fatal(err.Error())
@@ -115,37 +123,51 @@ func tackList(tlf entities.TaskListFilter) []entities.Task {
 
 func TestMainUsersGet(t *testing.T) {
 	user, err := getUserByName(userName)
+
 	require.NoError(t, err)
+
 	require.NotEqual(t, 0, user.GetID())
 }
 
 func TestMainUsersPut(t *testing.T) {
 	_, err := createUser(userName)
+
 	require.EqualError(t, err, "такой пользователь уже существует")
 
 	user, err := createUser(randSeq(10))
+
 	require.Equal(t, nil, err)
+
 	require.NotEqual(t, 0, user.GetID())
 }
 
 func TestMainTasksPost(t *testing.T) {
 	user, err := getUserByName(userName)
+
 	require.NoError(t, err)
+
 	task := entities.Task{
-		Description:    "Some task",
+		Description: "Some task",
+
 		ExpirationDate: time.Date(2024, 2, 25, 20, 0, 0, 0, time.Local),
-		Done:           false,
-		User:           user,
+
+		Done: false,
+
+		User: user,
 	}
 
 	encodedMessage, err := json.Marshal(task)
+
 	require.NoError(t, err)
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, "/", bytes.NewReader(encodedMessage))
+
 	require.NoError(t, err)
 
 	rr := httptest.NewRecorder()
+
 	handler := http.HandlerFunc(handlers.AddTask)
+
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
@@ -157,18 +179,26 @@ func TestMainTasksPost(t *testing.T) {
 
 func TestTasksGet(t *testing.T) {
 	user, err := getUserByName(userName)
+
 	require.NoError(t, err)
+
 	tlf := entities.TaskListFilter{User: user}
+
 	taskList := tackList(tlf)
+
 	require.NotEmpty(t, taskList)
 }
 
 func randSeq(n int) string {
 	max := big.NewInt(int64(len(letters)))
+
 	b := make([]rune, n)
+
 	for i := range b {
 		randInt, _ := rand.Int(rand.Reader, max)
+
 		b[i] = letters[randInt.Int64()]
 	}
+
 	return string(b)
 }
