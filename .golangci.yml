@@ -31,6 +31,7 @@ linters-settings:
           "github.com/VladislavLisovenko/task_management/client/http_requests",
           "github.com/VladislavLisovenko/task_management/client/menu",
           "github.com/VladislavLisovenko/task_management/client/entities",
+          "github.com/stretchr/testify/require",
         ]
 
 linters:
