@@ -3,10 +3,11 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"log"
-	"math/rand"
+	"math/big"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -25,12 +26,8 @@ const (
 	userName = "Andrey"
 )
 
-func init() {
-	rand.NewSource(time.Now().UnixNano())
-}
-
 func getUserByName(name string) (entities.User, error) {
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "/users?name="+userName, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "/users?name="+name, nil)
 	if err != nil {
 		return entities.User{}, err
 	}
@@ -52,7 +49,7 @@ func getUserByName(name string) (entities.User, error) {
 		return entities.User{}, errors.New("id is not a number")
 	}
 
-	user := entities.User{Name: userName}
+	user := entities.User{Name: name}
 	user.SetID(id)
 
 	return user, nil
@@ -167,9 +164,11 @@ func TestTasksGet(t *testing.T) {
 }
 
 func randSeq(n int) string {
+	max := big.NewInt(int64(len(letters)))
 	b := make([]rune, n)
 	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
+		randInt, _ := rand.Int(rand.Reader, max)
+		b[i] = letters[randInt.Int64()]
 	}
 	return string(b)
 }
