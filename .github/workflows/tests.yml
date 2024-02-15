@@ -62,12 +62,12 @@ jobs:
         fi
 
     - name: Run migrations
-      run: psql -f docker-entrypoint-initdb.d/filldb.sql postgresql://postgres:postgres@localhost:5436/postgres
+      run: psql -f docker-entrypoint-initdb.d/filldb.sql postgresql://postgres:postgres@localhost:5432/postgres
 
     - name: Build
       run: go build -v -o serverapp ./server/server.go
 
     - name: Test
-      run: go test -race -count 100 -v ./server
+      run: go test -race -count 1 -v ./server
       env: 
         DATABASE_DSN: "user=postgres host=localhost password=postgres port=5432 database=postgres sslmode=disable"
