@@ -7,11 +7,10 @@ import (
 
 	"github.com/VladislavLisovenko/task_management/server/db"
 	"github.com/VladislavLisovenko/task_management/server/entities"
-	"github.com/go-chi/chi"
 )
 
 func UserByName(w http.ResponseWriter, r *http.Request) {
-	userName := chi.URLParam(r, "name")
+	userName := r.URL.Query().Get("name")
 
 	if userName == "" {
 		w.Header().Add("error", "Имя пользователя не указано")
